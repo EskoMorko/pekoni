@@ -1,0 +1,12 @@
+{
+  "name": "pekoni-lotto",
+  "version": "0.0.1"	,
+  "dependencies": {
+    "baconjs": "^0.7.41"
+  },
+  "scripts": {
+  	"start": "npm run browser-sync && npm run coffee",
+  	"browser-sync": "browser-sync start --files 'index.html, css/*.css, scripts/*.js' --server",
+  	"coffee" : "coffee --watch --map --compile scripts/main.coffee"
+  }
+}
