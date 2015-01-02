@@ -40,5 +40,3 @@ $ ->
       $(".selected").removeClass "selected"
 
    enoughNumbers.onValue (enable) -> $("#clear").toggle(enable)
-
-   #test
