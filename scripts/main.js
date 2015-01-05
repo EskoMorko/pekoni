@@ -3,7 +3,7 @@
   var __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   $(function() {
-    var byNumber, elementValue, enoughNumbers, num, numberStream, numberValue, selectedNumbers, toggleNumber, _i;
+    var byNumber, clearSelections, elementValue, enoughNumbers, num, numberStream, numberValue, selectedNumbers, toggleNumber, _i;
     for (num = _i = 0; _i <= 31; num = ++_i) {
       $("#game").append("<div class=\"number\" data-num=\"" + num + "\">" + num + "</div>");
     }
@@ -29,10 +29,13 @@
         }
       }
     };
-    numberStream = function() {
-      return $(".number").asEventStream("click").map(numberValue).map(parseInt).scan([], toggleNumber);
+    numberStream = function(acc) {
+      return $(".number").asEventStream("click").map(numberValue).map(parseInt).scan(acc, toggleNumber);
     };
-    selectedNumbers = numberStream();
+    clearSelections = $("#clear").asEventStream("click");
+    selectedNumbers = clearSelections.map([]).startWith([]).flatMapLatest(function(acc) {
+      return numberStream(acc);
+    }).toProperty();
     enoughNumbers = selectedNumbers.map(function(nums) {
       return nums.length >= 7;
     });

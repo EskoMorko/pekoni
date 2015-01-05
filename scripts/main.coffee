@@ -20,14 +20,23 @@ $ ->
          else
             return numbers
 
-      
-   numberStream = () ->
+
+   numberStream = (acc) ->
       $(".number").asEventStream("click")
       .map numberValue
       .map parseInt
-      .scan [], toggleNumber
- 
-   selectedNumbers = numberStream()
+      .scan acc, toggleNumber
+
+   clearSelections = $("#clear").asEventStream("click")
+
+   #selectedNumbers = numberStream()
+   selectedNumbers = clearSelections
+      .map([])
+      .startWith([])
+      .flatMapLatest (acc) -> numberStream(acc)
+      .toProperty()
+
+
    enoughNumbers = selectedNumbers.map (nums) -> nums.length >= 7
 
    selectedNumbers.onValue (numbers) ->
@@ -40,3 +49,5 @@ $ ->
       $(".selected").removeClass "selected"
 
    enoughNumbers.onValue (enable) -> $("#clear").toggle(enable)
+
+
