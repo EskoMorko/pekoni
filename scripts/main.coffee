@@ -5,9 +5,6 @@ $ ->
    numberValue = (e) ->
       $(e.currentTarget).text()
 
-   elementValue = (e) ->
-      $(e.currentTarget)
-
    byNumber = (a, b) ->
       a > b
 
@@ -20,16 +17,14 @@ $ ->
          else
             return numbers
 
-
-   numberStream = (acc) ->
+   numberStream = (seed) ->
       $(".number").asEventStream("click")
       .map numberValue
       .map parseInt
-      .scan acc, toggleNumber
+      .scan seed, toggleNumber
 
    clearSelections = $("#clear").asEventStream("click")
 
-   #selectedNumbers = numberStream()
    selectedNumbers = clearSelections
       .map([])
       .startWith([])
@@ -45,9 +40,4 @@ $ ->
       for n in numbers
          $("[data-num=#{n}]").addClass "selected"
 
-   selectedNumbers.delay(2000).onEnd () ->
-      $(".selected").removeClass "selected"
-
    enoughNumbers.onValue (enable) -> $("#clear").toggle(enable)
-
-
