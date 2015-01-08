@@ -23,7 +23,26 @@ $ ->
       .map parseInt
       .scan seed, toggleNumber
 
-   clearSelections = $("#clear").asEventStream("click")
+   renderNumbers = (numbers) ->
+      $(".number").removeClass "selected"
+      $("#results").text numbers.sort(byNumber).join ","
+      for n in numbers
+         $("[data-num=#{n}]").addClass "selected"
+
+   fromKey = (keyCode) ->
+      $(document).asEventStream("keyup").filter( (e) -> e.keyCode == keyCode )
+
+   # end of helpers
+
+   resetClick = $("#clear").asEventStream("click")
+   escapeKey = fromKey(27)
+
+   rKey = fromKey(82).startWith("click")
+
+   clearSelections = resetClick.merge(escapeKey)
+
+   randomNumbers = rKey
+      .flatMapLatest () -> numberStream([1..7])
 
    selectedNumbers = clearSelections
       .map([])
@@ -34,10 +53,6 @@ $ ->
 
    enoughNumbers = selectedNumbers.map (nums) -> nums.length >= 7
 
-   selectedNumbers.onValue (numbers) ->
-      $(".number").removeClass "selected"
-      $("#results").text numbers.sort(byNumber).join ","
-      for n in numbers
-         $("[data-num=#{n}]").addClass "selected"
+   selectedNumbers.combine(randomNumbers, ".concat").onValue(renderNumbers)
 
    enoughNumbers.onValue (enable) -> $("#clear").toggle(enable)
