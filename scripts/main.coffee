@@ -1,6 +1,4 @@
 $ ->
-   for num in [0..31]
-      $("#game").append("<div class=\"number\" data-num=\"#{num}\">#{num}</div>")
 
    numberValue = (e) ->
       $(e.currentTarget).text()
@@ -34,25 +32,38 @@ $ ->
 
    # end of helpers
 
-   resetClick = $("#clear").asEventStream("click")
-   escapeKey = fromKey(27)
 
-   rKey = fromKey(82).startWith("click")
+   getRandomNumber = (min, max) ->
+      Math.floor(Math.random() * (max - min) + min)
 
-   clearSelections = resetClick.merge(escapeKey)
+   getRandomNumbers = (count) ->
+      for[1..count]
+         getRandomNumber(1,31)
 
-   randomNumbers = rKey
-      .flatMapLatest () -> numberStream([1..7])
+   for num in [1..31]
+      $("#game").append("<div class=\"number\" data-num=\"#{num}\">#{num}</div>")
 
-   selectedNumbers = clearSelections
+
+   resetClickStream = $("#clear").asEventStream("click")
+   escapeKeyStream = fromKey(27)
+   rKeyUpStream = fromKey(82)
+
+   clearSelectionsStream = resetClickStream.merge(escapeKeyStream)
+
+   randomNumbers = rKeyUpStream
+      .flatMapLatest () -> numberStream(getRandomNumbers(7))
+
+   clearSelections = clearSelectionsStream
       .map([])
       .startWith([])
       .flatMapLatest (acc) -> numberStream(acc)
-      .toProperty()
 
+   selectedNumbers = clearSelections
+      .merge(randomNumbers)
+      .toProperty()
 
    enoughNumbers = selectedNumbers.map (nums) -> nums.length >= 7
 
-   selectedNumbers.combine(randomNumbers, ".concat").onValue(renderNumbers)
+   selectedNumbers.onValue renderNumbers
 
    enoughNumbers.onValue (enable) -> $("#clear").toggle(enable)
